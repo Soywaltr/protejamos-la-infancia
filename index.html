@@ -816,13 +816,25 @@ const VIDEO_URL = "https://youtu.be/4IPG3o1-8Ek";
   }
   function loadVideo(id){
     const f = document.createElement('iframe');
-    f.src = 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0&modestbranding=1&playsinline=1';
+    f.id = 'ytPlayer';
+    f.src = 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&vq=hd1080';
     f.title = 'Video de la exposición de la investigación';
     f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
     f.referrerPolicy = 'strict-origin-when-cross-origin';
     f.allowFullscreen = true; f.loading = 'lazy';
     player.appendChild(f);
     openYT.href = 'https://www.youtube.com/watch?v=' + id;
+
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.body.appendChild(tag);
+    window.onYouTubeIframeAPIReady = function(){
+      new YT.Player('ytPlayer', {
+        events: {
+          onReady: e => e.target.setPlaybackQuality('hd1080')
+        }
+      });
+    };
   }
   const initialId = ytId(VIDEO_URL);
   if (initialId) loadVideo(initialId);
