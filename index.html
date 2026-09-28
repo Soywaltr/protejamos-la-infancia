@@ -554,23 +554,10 @@ button.chip{cursor:pointer}
 
       <div class="expo-grid">
         <div class="video-shell glass reveal">
-          <div class="player" id="player">
-            <div class="empty" id="emptyState">
-              <div class="play-orb" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 6 4.5z"/></svg></div>
-              <h3>Aquí va el video de la exposición</h3>
-              <p>Pega el enlace de YouTube abajo y presiona «Cargar video».</p>
-            </div>
-          </div>
-          <form class="url-form" id="urlForm" novalidate>
-            <label for="urlInput" class="sr-only">Enlace del video de YouTube</label>
-            <input id="urlInput" type="url" inputmode="url" autocomplete="off" placeholder="https://www.youtube.com/watch?v=…">
-            <button class="btn btn-primary" type="submit"><span aria-hidden="true">▶️</span> Cargar video</button>
-          </form>
-          <p class="form-msg" id="formMsg" role="status" aria-live="polite"></p>
-          <div class="video-bar" id="videoBar" hidden>
+          <div class="player" id="player"></div>
+          <div class="video-bar" id="videoBar">
             <span class="chip"><span aria-hidden="true">✅</span> Video listo</span>
             <div class="chips">
-              <button class="chip" type="button" id="changeVideo"><span aria-hidden="true">🔁</span> Cambiar video</button>
               <a class="chip" id="openYT" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><span aria-hidden="true">📺</span> Abrir en YouTube</a>
             </div>
           </div>
@@ -639,7 +626,7 @@ button.chip{cursor:pointer}
 <button class="to-top glass" id="toTop" type="button" aria-label="Volver arriba">⬆️</button>
 <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
 <script>
-const VIDEO_URL = "";
+const VIDEO_URL = "https://youtu.be/4IPG3o1-8Ek";
 
 (() => {
   const $ = (s, c = document) => c.querySelector(s);
@@ -810,8 +797,7 @@ const VIDEO_URL = "";
     }, { passive: true });
   }
 
-  const player = $('#player'), empty = $('#emptyState'), form = $('#urlForm'), input = $('#urlInput'),
-        msg = $('#formMsg'), vbar = $('#videoBar'), openYT = $('#openYT');
+  const player = $('#player'), openYT = $('#openYT');
   function ytId(raw){
     if (!raw) return null;
     const u = raw.trim();
@@ -828,8 +814,7 @@ const VIDEO_URL = "";
       return id && /^[\w-]{11}$/.test(id.slice(0, 11)) ? id.slice(0, 11) : null;
     } catch(e){ return null; }
   }
-  function loadVideo(id, announce){
-    $('iframe', player)?.remove();
+  function loadVideo(id){
     const f = document.createElement('iframe');
     f.src = 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0&modestbranding=1&playsinline=1';
     f.title = 'Video de la exposición de la investigación';
@@ -837,26 +822,10 @@ const VIDEO_URL = "";
     f.referrerPolicy = 'strict-origin-when-cross-origin';
     f.allowFullscreen = true; f.loading = 'lazy';
     player.appendChild(f);
-    empty.hidden = true; form.hidden = true; vbar.hidden = false; msg.textContent = '';
     openYT.href = 'https://www.youtube.com/watch?v=' + id;
-    if (announce) toast('🎬 Video cargado');
   }
-  function resetVideo(){
-    $('iframe', player)?.remove();
-    empty.hidden = false; form.hidden = false; vbar.hidden = true; input.value = ''; input.focus();
-    store.del('videoId');
-  }
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const id = ytId(input.value);
-    if (!input.value.trim()){ msg.textContent = 'Pega el enlace del video para continuar.'; input.focus(); return; }
-    if (!id){ msg.textContent = 'Ese enlace no es de YouTube. Cópialo desde el botón «Compartir» del video.'; input.focus(); return; }
-    store.set('videoId', id); loadVideo(id, true);
-  });
-  input.addEventListener('input', () => { msg.textContent = ''; });
-  $('#changeVideo').addEventListener('click', resetVideo);
-  const initialId = ytId(VIDEO_URL) || store.get('videoId');
-  if (initialId) loadVideo(initialId, false);
+  const initialId = ytId(VIDEO_URL);
+  if (initialId) loadVideo(initialId);
 
   const startTab = location.hash === '#exposicion' ? 'exposicion' : 'investigacion';
   activate(startTab);
